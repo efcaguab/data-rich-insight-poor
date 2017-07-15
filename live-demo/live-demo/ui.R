@@ -9,25 +9,46 @@
 
 library(shiny)
 
-# Define UI for application that draws a histogram
 shinyUI(fluidPage(
   
-  # Application title
-  titlePanel("Old Faithful Geyser Data"),
+  title = "Species accumulation curve",
+  h1("Species accumulation curve"),
+  plotOutput("distPlot"),
   
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
-       sliderInput("bins",
-                   "Number of bins:",
-                   min = 1,
-                   max = 50,
-                   value = 30)
+  hr(),
+  
+  fluidRow(
+    column(3,
+           h4("Diamonds Explorer"),
+           'Description here'
     ),
-    
-    # Show a plot of the generated distribution
-    mainPanel(
-       plotOutput("distPlot")
+    column(4, offset = 1,
+           "more description"
+    ),
+    column(4,
+           tableOutput("spp_acc_curve")
     )
   )
 ))
+
+# # Define UI for application that draws a histogram
+# shinyUI(fluidPage(
+#   
+#   # Application title
+#   titlePanel("Speccies accumulation curve"),
+#   
+#   
+#   
+#   # Sidebar with a slider input for number of bins 
+#   sidebarLayout(
+#     sidebarPanel(
+#       "asdasd asd asd asd",
+#       
+#     ),
+#     
+#     # Show a plot of the generated distribution
+#     mainPanel(
+#        plotOutput("distPlot")
+#     )
+#   )
+# ))
