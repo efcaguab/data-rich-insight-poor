@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y -t unstable \
     sudo \
     gdebi-core \
     pandoc \
+    libssl-dev \
     pandoc-citeproc \
     libcurl4-gnutls-dev \
     libcairo2-dev/unstable \
