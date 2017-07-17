@@ -1,2 +1,7 @@
 
 Listening on http://127.0.0.1:36241
+
+Error in setwd(oldwd) : cannot change working directory
+Calls: runApp -> <Anonymous> -> setwd
+Execution halted
+sh: 0: getcwd() failed: No such file or directory
