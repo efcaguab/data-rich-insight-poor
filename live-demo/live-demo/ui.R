@@ -18,13 +18,13 @@ shinyUI(fluidPage(
   hr(),
   
   fluidRow(
-    column(3,
-           h4("Diamonds Explorer"),
-           'Description here'
+    column(8,
+           h4("Real time data analysis"),
+           "Supose we are interested on investigating the animal diversity of a particular location. An appropiate data infrastructure enables continuous exploration of the collected data. In this simple example it's easy to determine when enough sites have been sampled and an adequate biodiversity estimate has been obtained. All without repeated analysis or extra resources. Usually the more expensive the data collection, the more complex the data analysis, or the more urgent the research answer, the more savings can be made by setting up a data infrastructure with automated reports/analysis."
     ),
-    column(4, offset = 1,
-           "more description"
-    ),
+    # column(4, offset = 1,
+    #        "more description"
+    # ),
     column(4,
            tableOutput("spp_acc_curve")
     )

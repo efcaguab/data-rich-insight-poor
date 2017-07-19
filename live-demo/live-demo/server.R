@@ -34,7 +34,7 @@ community_tb <- function(x){
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
-  
+
   data <- reactivePoll(1000, session,
     checkFunc = function(){
       form_metadata <- httr::GET("https://kc.kobotoolbox.org/api/v1/forms/111907",
@@ -43,14 +43,14 @@ shinyServer(function(input, output, session) {
       form_metadata$date_modified
     },
     valueFunc = function(){
-      d <- httr::GET("https://kc.kobotoolbox.org/api/v1/data/111907", 
-                     httr::authenticate("efcaguab", "DQe1csPKT14!")) 
+      d <- httr::GET("https://kc.kobotoolbox.org/api/v1/data/111907",
+                     httr::authenticate("efcaguab", "DQe1csPKT14!"))
       d <- httr::content(d)
       d <- jsonlite::toJSON(d)
       jsonlite::fromJSON(d)
     }
   )
-  
+
 
   output$spp_acc_curve <- renderTable({
     community_df(data()) %>%
