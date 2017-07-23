@@ -28,6 +28,7 @@ library(dplyr)
 # read data
 fishing_zones <- readOGR("./gis", "fishing-zones")
 fishing_zones$zone_name <- paste("Zone", fishing_zones$zone_num)
+fishing_zones$zone_num <- as.integer(as.character(fishing_zones$zone_num))
 data <- readRDS("./data/processed/fishing_global.rds")
 parameters <- readRDS("./data/processed/parameters.rds")
 
@@ -427,14 +428,14 @@ create_pal <- function(x){
   palette = c("#fff5eb", "#d94801"),
   domain = c(min(x), max(x)))
 }
-  
+
 
 renderUI(
 	list(
   tags$style(type = "text/css", "html, body {width:100%;height:100%}"),
   absolutePanel(top = 0, right = "30%", bottom = 0, left = 0,
                 leafletOutput("map", width = "100%", height = "100%")),
-  absolutePanel(top = 0, right = 0, bottom = 0, left = "70%", 
+  absolutePanel(top = 0, right = 0, bottom = 0, left = "70%",
     # sliderInput("range", "Magnitudes", min(quakes$mag), max(quakes$mag),
     #   value = range(quakes$mag), step = 0.1
     # ),
@@ -458,27 +459,27 @@ output$map <- renderLeaflet({
   })
 
 observe({
-  
+
   c(fish_location(), update_map$u, fish_zone(), input$variable_to_display)
   proxy <- leafletProxy("map")
-  
-  proxy %>% 
+
+  proxy %>%
     clearGroup("fish_markers") %>%
     clearGroup("zone_polygon")
-  
-  
+
+
   if(nrow(fish_location()) >= 1){
-    
+
     set.seed(1)
     d <- fish_location() %>%
       rowwise()# %>%
      # mutate_at(vars(lng, lat), funs(add_jitter), j = 0.004)
-    
+
       x <- fish_zone()@data %>%
         filter(zone_num %in% 1:6) %>%
         extract(, input$variable_to_display, T)
       pal <- create_pal(na.omit(x))
-      
+
       proxy %>%
         addPolygons(data = fish_zone(),
                     color = pal(fish_zone()@data %>%
@@ -491,17 +492,17 @@ observe({
                     opacity = 1,
                     popup = ~pop,
                     group = "zone_polygon") %>%
-        addCircleMarkers(data = d, 
-                         stroke = T, 
-                         fillColor = ~palp(Pelagic_or_demersal), 
+        addCircleMarkers(data = d,
+                         stroke = T,
+                         fillColor = ~palp(Pelagic_or_demersal),
                          weight = 1,
                          color = "#ffffff",
                          # radius = ~size,
                          radius = 5,
                          popup = ~size,
-                         fillOpacity = 0.75, 
+                         fillOpacity = 0.75,
                          group = "fish_markers")
-       
+
   }
 }, priority = 10)
 
@@ -509,13 +510,13 @@ update_map <- reactiveValues()
 update_map$u <- 0
 
 output$barplot <- renderPlot({
-  
-  x <- fish_zone()@data %>%
-        filter(zone_num %in% 1:6) %>%
-        extract(, input$variable_to_display, T) %>%
-    na.omit()
-  # pal <- create_pal(na.omit(x))
-      
+
+x <- fish_zone()@data %>%
+      filter(zone_num %in% 1:6) %>%
+      extract(, input$variable_to_display, T) %>%
+  na.omit()
+pal <- create_pal(na.omit(x))
+
   p <- fish_zone()@data %>%
     distinct() %>%
     mutate(zone = plyr::mapvalues(zone_num, 1:8, c(paste("Zone", 1:6), "No Zone", "No Zone"))) %>%
@@ -550,6 +551,7 @@ output$barplot <- renderPlot({
     p
 })
 
+
 ```
 
 > Click on the map features for more information. Location information is only available after September 2016. Reds and Blues correspond to demersal and pelagic species respectively. Squares within the Food Security Zones roughly correspond to an area o fone square kilometer. Fishing Zone assignment is based on data entry declaration and not on the actual GPS fishing positions.
@@ -560,31 +562,31 @@ output$barplot <- renderPlot({
 renderDataTable(
   fish_dates_method() %>%
     mutate(date = format(
-      as.POSIXct(as.POSIXlt(TripDate, tz = "Indian/Mahe")), "%Y-%m-%d"), 
-      kg = round(CalcWeight/1000, 1), 
+      as.POSIXct(as.POSIXlt(TripDate, tz = "Indian/Mahe")), "%Y-%m-%d"),
+      kg = round(CalcWeight/1000, 1),
       method = sub("\\s.+$", "", Fishing_method)) %>%
-    rename(zone = FSZ_Name, 
-           depth_m = DepthCaught, 
-           name = English_names, 
+    rename(zone = FSZ_Name,
+           depth_m = DepthCaught,
+           name = English_names,
            sci_name = Scientific_names) %>%
-    select(date, 
-           name, 
+    select(date,
+           name,
            # sci_name,
            kg,
            method,
            depth_m,
            zone) %>%
-    datatable(#style = "bootstrap", 
+    datatable(#style = "bootstrap",
               extensions = c('Buttons', "Scroller"),
               options = list(dom = 'Bti',
                              buttons = c('copy', 'csv', 'pdf', 'print'),
                              bPaginate = FALSE,
                              paging = FALSE,
                              scrollCollapse = FALSE,
-                             scroll_Y = 100, 
-                             # scroller = T, 
+                             scroll_Y = 100,
+                             # scroller = T,
                              deferRender = TRUE
-                             ), 
+                             ),
               rownames = FALSE,
               fillContainer = T)
 )
@@ -598,40 +600,40 @@ renderDataTable(
     group_by() %>%
     select(-se) %>%
     mutate(date = format(
-      as.POSIXct(as.POSIXlt(date, tz = "Indian/Mahe")), "%Y-%m-%d"), 
+      as.POSIXct(as.POSIXlt(date, tz = "Indian/Mahe")), "%Y-%m-%d"),
       biomass = round(biomass, 1),
-      effort = round(effort, 1), 
+      effort = round(effort, 1),
       hours = round(hours, 1),
       cpue = round(cpue, 1)) %>%
     rename(method = Fishing_method,
-           effort_hrs_line = effort, 
+           effort_hrs_line = effort,
            mean_cpue = cpue)%>%
-    datatable(#style = "bootstrap", 
+    datatable(#style = "bootstrap",
               extensions = c('Buttons', "Scroller"),
               options = list(dom = 'Bti',
                              buttons = c('copy', 'csv', 'pdf', 'print'),
                              bPaginate = FALSE,
                              paging = FALSE,
                              scrollCollapse = FALSE,
-                             scroll_Y = 100, 
-                             # scroller = T, 
+                             scroll_Y = 100,
+                             # scroller = T,
                              deferRender = TRUE
-                             ), 
+                             ),
       rownames = FALSE,
       fillContainer = T)
     )
 ```
 
 
-## summary values 
+## summary values
 
 ```{r summary}
 fish_summary <- reactive({
   fish_trip() %>%
     group_by() %>%
-    summarise(n_individuals = sum(n_individuals, na.rm = T), 
+    summarise(n_individuals = sum(n_individuals, na.rm = T),
               biomass = sum(biomass, na.rm = T),
-              trips = n_distinct(date), 
+              trips = n_distinct(date),
               hours = sum(hours, na.rm = T))
 })
 
@@ -641,7 +643,7 @@ fish_summary <- reactive({
 ### Indivuduals
 
 ```{r}
-renderValueBox(valueBox(value = fish_summary()$n_individuals[1], 
+renderValueBox(valueBox(value = fish_summary()$n_individuals[1],
          caption = 'individual fish',
          icon = "fa-paw"))
 
@@ -650,7 +652,7 @@ renderValueBox(valueBox(value = fish_summary()$n_individuals[1],
 ### Biomass
 
 ```{r}
-renderValueBox(valueBox(value = paste(round(fish_summary()$biomass[1])), 
+renderValueBox(valueBox(value = paste(round(fish_summary()$biomass[1])),
          caption = 'kg of catch',
          icon = "fa-balance-scale"))
 
@@ -659,7 +661,7 @@ renderValueBox(valueBox(value = paste(round(fish_summary()$biomass[1])),
 ### Trips
 
 ```{r}
-renderValueBox(valueBox(value = fish_summary()$trips[1], 
+renderValueBox(valueBox(value = fish_summary()$trips[1],
          caption = 'fishing trips',
          icon = "fa-ship"))
 
@@ -668,7 +670,7 @@ renderValueBox(valueBox(value = fish_summary()$trips[1],
 ### Fishinh hours
 
 ```{r}
-renderValueBox(valueBox(value = paste(round(fish_summary()$hours[1])), 
+renderValueBox(valueBox(value = paste(round(fish_summary()$hours[1])),
          caption = 'fishing hours',
          icon = "fa-clock-o"))
 
@@ -681,22 +683,22 @@ renderValueBox(valueBox(value = paste(round(fish_summary()$hours[1])),
 
 
 ```{r}
-dateRangeInput(inputId = "overview_date_range2", 
-            label = h4("When"), 
-            min = parameters$min_date, 
-            max = parameters$max_date, 
-            start = as.POSIXct("2006-01-01", tz = "Indian/Mahe"), 
+dateRangeInput(inputId = "overview_date_range2",
+            label = h4("When"),
+            min = parameters$min_date,
+            max = parameters$max_date,
+            start = as.POSIXct("2006-01-01", tz = "Indian/Mahe"),
             end = parameters$max_date)
 
-# actionButton(inputId = "view_last_month2", 
+# actionButton(inputId = "view_last_month2",
 #              label = h6("last month", style = "margin: 0px;"), width = "50%")
-# 
-# actionButton(inputId = "view_last_year2", 
+#
+# actionButton(inputId = "view_last_year2",
 #              label = h6("last year", style = "margin: 0px;"), width = "50%")
-# 
-# actionButton(inputId = "view_post_review2", 
+#
+# actionButton(inputId = "view_post_review2",
 #              label = h6("after monitoring review", style = "margin: 0px;"), width = "100%")
-# 
+#
 # observeEvent(input$view_post_review2, btns$pr <- btns$pr + 1)
 # observeEvent(input$view_last_year2, btns$ly <- btns$ly + 1)
 # observeEvent(input$view_last_month2, btns$lm <- btns$lm + 1)
@@ -719,16 +721,16 @@ fish_consumption <- reactive({
               residents = mean(NumberResidents, na.rm = T)) %>%
     # filter(biomass > 10000) %>%
     mutate(days = as.numeric(difftime(lead(TripDate), TripDate, units = "days")),
-           persons = (residents + lead(residents))/2, 
-           date = TripDate + days/2, 
+           persons = (residents + lead(residents))/2,
+           date = TripDate + days/2,
            consumption = biomass / days / persons,
            edible = consumption * 0.6) %>%
     filter(!is.na(consumption))
-  
+
   validate(
     need(nrow(o) > 0, "No data")
   )
-  
+
   o
 })
 ```
@@ -736,23 +738,23 @@ fish_consumption <- reactive({
 
 ## Consumption plot {data-width=700}
 
-### 
+###
 
 ```{r}
 
 renderPlot({
   p <- fish_consumption() %>%
     ggplot(aes(date, consumption))
-  
+
   if(nrow(fish_consumption())>=5){
     p <- p + geom_smooth(colour = "black")
   }
-  
+
   p <- p +
     geom_point() +
     xlab("") + ylab("Consumption (gr / person / day)") +
     theme_bw()
-  
+
   # ggplotly(p)
   p
   })
@@ -777,17 +779,17 @@ output$span_suggestion <- renderUI({
 ```
 
 
-### 
+###
 
 ```{r}
 
 renderValueBox({
   cons <- round(mean(fish_consumption()$consumption))
   valueBox(value = cons,
-           caption = paste(div("Mean consumption grams / person / day", br(), 
+           caption = paste(div("Mean consumption grams / person / day", br(),
                                strong(round(cons*30/1000, 1)),
                            " kg / person / month",
-                           style = "font-size:13px;")), 
+                           style = "font-size:13px;")),
            icon = "fa-cutlery")
 })
 
@@ -802,24 +804,24 @@ renderDataTable(fish_consumption() %>%
                   filter(!is.na(consumption)) %>%
                   rename(period = date,
                          catch = biomass) %>%
-                  mutate(catch = round(catch/1000), 
-                         cons. = round(consumption), 
+                  mutate(catch = round(catch/1000),
+                         cons. = round(consumption),
                          # edible_gr = round(edible),
                          n = persons,
                          period = format(
       as.POSIXct(as.POSIXlt(period, tz = "Indian/Mahe")), "%Y-%m-%d")) %>%
                   select(period, n, catch, cons.) %>%
-    datatable(#style = "bootstrap", 
+    datatable(#style = "bootstrap",
               extensions = c('Buttons', "Scroller"),
               options = list(dom = 'Bti',
                              buttons = c('copy', 'csv', 'pdf', 'print'),
                              bPaginate = FALSE,
                              paging = FALSE,
                              scrollCollapse = FALSE,
-                             scroll_Y = 100, 
-                             # scroller = T, 
+                             scroll_Y = 100,
+                             # scroller = T,
                              deferRender = TRUE
-                             ), 
+                             ),
       rownames = FALSE,
       fillContainer = T)
       )
@@ -832,23 +834,23 @@ renderDataTable(fish_consumption() %>%
 ## Options {.sidebar}
 
 ```{r}
-dateRangeInput(inputId = "overview_date_range3", 
-                label = h4("When"), 
-            min = parameters$min_date, 
-            max = parameters$max_date, 
-            start = as.POSIXct("2006-01-01", tz = "Indian/Mahe"), 
+dateRangeInput(inputId = "overview_date_range3",
+                label = h4("When"),
+            min = parameters$min_date,
+            max = parameters$max_date,
+            start = as.POSIXct("2006-01-01", tz = "Indian/Mahe"),
             end = parameters$max_date)
 
-# 
-# actionButton(inputId = "view_last_month3", 
+#
+# actionButton(inputId = "view_last_month3",
 #              label = h6("last month", style = "margin: 0px;"), width = "50%")
-# 
-# actionButton(inputId = "view_last_year3", 
+#
+# actionButton(inputId = "view_last_year3",
 #              label = h6("last year", style = "margin: 0px;"), width = "50%")
-# 
-# actionButton(inputId = "view_post_review3", 
+#
+# actionButton(inputId = "view_post_review3",
 #              label = h6("after monitoring review", style = "margin: 0px;"), width = "100%")
-# 
+#
 # observeEvent(input$view_post_review3, btns$pr <- btns$pr + 1)
 # observeEvent(input$view_last_year3, btns$ly <- btns$ly + 1)
 # observeEvent(input$view_last_month3, btns$lm <- btns$lm + 1)
@@ -868,39 +870,39 @@ observeEvent(input$overview_date_range3, {
 ```{r}
 fish_restricted <- reactive({
   fish_dates() %>%
-    filter(Restricted_species == 1) 
+    filter(Restricted_species == 1)
 })
 renderDataTable(
   fish_restricted() %>%
     mutate(date = format(
-      as.POSIXct(as.POSIXlt(TripDate, tz = "Indian/Mahe")), "%Y-%m-%d"), 
+      as.POSIXct(as.POSIXlt(TripDate, tz = "Indian/Mahe")), "%Y-%m-%d"),
       kg = round(CalcWeight/1000, 1),
       method = sub("\\s.+$", "", Fishing_method)
       ) %>%
-    rename(zone = FSZ_Name, 
-           depth = DepthCaught, 
-           name = English_names, 
+    rename(zone = FSZ_Name,
+           depth = DepthCaught,
+           name = English_names,
            sci_name = sci_name_short,
            use = FishUse) %>%
-    select(date, 
-           name, 
+    select(date,
+           name,
            # sci_name,
            kg,
            method,
            depth,
-           # zone, 
+           # zone,
            use) %>%
-    datatable(#style = "bootstrap", 
+    datatable(#style = "bootstrap",
               extensions = c('Buttons', "Scroller"),
               options = list(dom = 'Bti',
                              buttons = c('copy', 'csv', 'pdf', 'print'),
                              bPaginate = FALSE,
                              paging = FALSE,
                              scrollCollapse = FALSE,
-                             scroll_Y = 100, 
-                             # scroller = T, 
+                             scroll_Y = 100,
+                             # scroller = T,
                              deferRender = TRUE
-                             ), 
+                             ),
               rownames = FALSE,
               fillContainer = T))
 ```
@@ -917,7 +919,7 @@ renderGauge({
     need(nrow(fish_restricted()) > 0, "No restricted species were caught during the specified period")
   )
   os <- fish_restricted() %>%
-    summarise(n = n(), 
+    summarise(n = n(),
               success = sum(FishUse == "Released") / n)
 #
   gauge(round(os$success[1]*100), 0, 100, gaugeSectors(danger = c(0,50), warning = c(51, 75), success = c(76, 100)), symbol = "%")
@@ -932,20 +934,20 @@ renderDataTable(
   fish_restricted() %>%
     rename(name = English_names) %>%
     group_by(name) %>%
-    summarise(n = n(), 
+    summarise(n = n(),
               success = sum(FishUse == "Released") / n) %>%
     # mutate(success = paste0(success, "%")) %>%
-    datatable(#style = "bootstrap", 
+    datatable(#style = "bootstrap",
               extensions = c("Scroller"),
               options = list(dom = 't',
                              # buttons = c('copy', 'csv', 'pdf', 'print'),
                              bPaginate = FALSE,
                              paging = FALSE,
                              scrollCollapse = FALSE,
-                             scroll_Y = 100, 
-                             # scroller = T, 
+                             scroll_Y = 100,
+                             # scroller = T,
                              deferRender = TRUE
-                             ), 
+                             ),
               rownames = FALSE,
               fillContainer = T) %>%
     formatPercentage('success')
@@ -958,28 +960,28 @@ renderDataTable(
 ## Options {.sidebar}
 
 ```{r}
-dateRangeInput(inputId = "overview_date_range4", 
-          label = h4("When"), 
-            min = parameters$min_date, 
-            max = parameters$max_date, 
-            start = as.POSIXct("2006-01-01", tz = "Indian/Mahe"), 
+dateRangeInput(inputId = "overview_date_range4",
+          label = h4("When"),
+            min = parameters$min_date,
+            max = parameters$max_date,
+            start = as.POSIXct("2006-01-01", tz = "Indian/Mahe"),
             end = parameters$max_date)
 
-# actionButton(inputId = "view_last_month4", 
+# actionButton(inputId = "view_last_month4",
 #              label = h6("last month", style = "margin: 0px;"), width = "50%")
-# 
-# actionButton(inputId = "view_last_year4", 
+#
+# actionButton(inputId = "view_last_year4",
 #              label = h6("last year", style = "margin: 0px;"), width = "50%")
-# 
-# actionButton(inputId = "view_post_review4", 
+#
+# actionButton(inputId = "view_post_review4",
 #              label = h6("after monitoring review", style = "margin: 0px;"), width = "100%")
-# 
+#
 radioButtons(inputId = "variable_to_display2",
 						label = h4("What"),
 						choices = c("catch (individuals)" = "num",
 												"catch (biomass)" = "bio"),
 						selected = "bio")
-# 
+#
 # observeEvent(input$view_post_review4, btns$pr <- btns$pr + 1)
 # observeEvent(input$view_last_year4, btns$ly <- btns$ly + 1)
 # observeEvent(input$view_last_month4, btns$lm <- btns$lm + 1)
@@ -995,13 +997,13 @@ observeEvent(input$overview_date_range4, {
 
 ## Plot {data-width=700}
 
-### 
+###
 
 ```{r}
 fish_species <- reactive({
   l <- 14.14
   fish_dates() %>%
-  mutate(tot_num=n(), 
+  mutate(tot_num=n(),
          tot_bio=sum(CalcWeight, na.rm = T)/1000,
          English_names = sub("\\sor\\s.+", "", English_names)) %>%
   group_by(English_names) %>%
@@ -1024,11 +1026,11 @@ fish_species_arranged <- reactive({
 
 ```{r}
 pallete <- reactive({
-      
+
   type <- input$variable_to_display2
   a <- fish_species_arranged() #%>%
        # filter_(lazyeval::interp(~col != 0, col = as.name(paste0("prop_", type))))
-  
+
   dem <- unique(filter(a, pd == "Demersal")$English_names)
   pel <- unique(filter(a, pd == "Pelagic")$English_names)
   pal <- c(
@@ -1045,14 +1047,14 @@ renderPlot({
 
   a <- fish_species_arranged() %>%
     filter_(lazyeval::interp(~col != 0, col = as.name(paste0("prop_", type))))
-  
+
   col <- paste0("prop_", type)
-  
+
   da <- a %>%
     arrange_(quote(pd), lazyeval::interp(~desc(x), x = as.name(type))) %>%
-    mutate(English_names = factor(English_names, levels = English_names), 
-           texts = paste(English_names, br(), num)) 
-  
+    mutate(English_names = factor(English_names, levels = English_names),
+           texts = paste(English_names, br(), num))
+
   p <- da %>%
     ggplot(aes_string(x = quote(English_names), y = type, text = quote(texts))) +
     geom_bar(stat = "identity", aes(fill = English_names), colour = "black", size = 0.25) +
@@ -1060,7 +1062,7 @@ renderPlot({
     theme_bw() +
     xlab("") +
     # scale_x_discrete(labels = )
-    theme(legend.position = "none", 
+    theme(legend.position = "none",
           axis.text.x = element_text(angle = 90))
 p
 # ggplotly(p, tooltip = "text")
@@ -1081,17 +1083,17 @@ renderDataTable({
            kg = bio) %>%
     mutate(kg = round(kg)) %>%
     select(name, kg, num) %>%
-    datatable(#style = "bootstrap", 
+    datatable(#style = "bootstrap",
               extensions = c("Scroller"),
               options = list(dom = 't',
                              # buttons = c('copy', 'csv', 'pdf', 'print'),
                              bPaginate = FALSE,
                              paging = FALSE,
                              scrollCollapse = FALSE,
-                             scroll_Y = 100, 
-                             # scroller = T, 
+                             scroll_Y = 100,
+                             # scroller = T,
                              deferRender = TRUE
-                             ), 
+                             ),
               rownames = FALSE,
               fillContainer = T)
 })
@@ -1104,21 +1106,21 @@ renderDataTable({
 ## Options {.sidebar}
 
 ```{r}
-dateRangeInput(inputId = "overview_date_range5", 
-       label = h4("When"), 
-            min = parameters$min_date, 
-            max = parameters$max_date, 
-            start = as.POSIXct("2006-01-01", tz = "Indian/Mahe"), 
+dateRangeInput(inputId = "overview_date_range5",
+       label = h4("When"),
+            min = parameters$min_date,
+            max = parameters$max_date,
+            start = as.POSIXct("2006-01-01", tz = "Indian/Mahe"),
             end = parameters$max_date)
 
-# 
-# actionButton(inputId = "view_last_month5", 
+#
+# actionButton(inputId = "view_last_month5",
 #              label = h6("last month", style = "margin: 0px;"), width = "50%")
-# 
-# actionButton(inputId = "view_last_year5", 
+#
+# actionButton(inputId = "view_last_year5",
 #              label = h6("last year", style = "margin: 0px;"), width = "50%")
-# 
-# actionButton(inputId = "view_post_review5", 
+#
+# actionButton(inputId = "view_post_review5",
 #              label = h6("after monitoring review", style = "margin: 0px;"), width = "100%")
 
 
@@ -1134,7 +1136,7 @@ observeEvent(input$overview_date_range5, {
 })
 br()
 br()
-checkboxGroupInput(inputId = "pelagic_or_demersal", 
+checkboxGroupInput(inputId = "pelagic_or_demersal",
                    label = h4("Catch category"),
                    choices = c("Demersal", "Pelagic"),
                    selected = c("Demersal", "Pelagic"),
@@ -1150,9 +1152,9 @@ checkboxInput(inputId = "decreassing_trend",
                    label = "species with decreasing trend")
 
 sliderInput(inputId = "significancy_level",
-            label = h5("Significancy level"), 
-            min = 0.01, 
-            max = 0.1, 
+            label = h5("Significancy level"),
+            min = 0.01,
+            max = 0.1,
             value = 0.05,
             step = 0.001)
 
@@ -1164,14 +1166,14 @@ sliderInput(inputId = "significancy_level",
 
 ```{r}
 fish_catch_categ <- reactive({
-  
+
   validate(
     need(length(input$pelagic_or_demersal) > 0,
          "Select at least one catch category")
   )
-  
+
   fish_dates() %>%
-    filter(CalcWeight < 50000, 
+    filter(CalcWeight < 50000,
            Pelagic_or_demersal %in% input$pelagic_or_demersal) %>%
     group_by(English_names) %>%
     mutate(num = n()) %>%
@@ -1183,7 +1185,7 @@ fish_size_trend <- reactive({
     plyr::ddply("English_names", function(x){
       m1 <- lm(CalcWeight ~ TripDate, data = x)
       m0 <- lm(CalcWeight ~ 1, data = x)
-      
+
       data.frame(intercept = m1$coefficients[1],
                  slope = m1$coefficients[2],
                  p = anova(m1, m0)$`Pr(>F)`[2])
@@ -1191,16 +1193,16 @@ fish_size_trend <- reactive({
 })
 
 renderPlot({
-  
+
    a <- fish_size_trend()
-   
+
    if(input$significant_trend) {
      a %<>% filter(p <= input$significancy_level)
    }
    if(input$decreassing_trend) {
      a %<>% filter(slope < 0)
    }
-   
+
    validate(
    	need(nrow(a) > 0, "No species with the desired criteria and meaningful catch data for the selected time period were found")
    )
@@ -1208,16 +1210,16 @@ renderPlot({
   p <- inner_join(fish_dates(), a) %>%
     filter(CalcWeight < 50000) %>%
     mutate(size = CalcWeight/1000,
-           sig = p < 0.05, 
+           sig = p < 0.05,
            slope = round(slope * 3600 * 24 * 365 / 1000, 3),
-           sig = plyr::mapvalues(sig, c(T, F), 
+           sig = plyr::mapvalues(sig, c(T, F),
                                  c("Significant trend",
                                    "Non-signnificant trend")),
            text = paste0(sig, ": ", slope, " kg/year")) %>%
-    rename(date = TripDate, 
+    rename(date = TripDate,
            species = English_names) %>%
-    ggplot(aes(date, size, 
-               colour = species, 
+    ggplot(aes(date, size,
+               colour = species,
                size = p > input$significancy_level,
                text = text)) +
     geom_smooth(se = F, method = "lm") +
@@ -1231,36 +1233,36 @@ renderPlot({
 })
 ```
 
-> Species for wich less than ten individuals were caught during the study period are not included in the analysis. Reds and blues correspond to demersal and pelagic species respectively with darker shades corresponding to species caught most frequently. Estimates might be imprecise for species that can be caught during both bottom and trolling fishing.  
+> Species for wich less than ten individuals were caught during the study period are not included in the analysis. Reds and blues correspond to demersal and pelagic species respectively with darker shades corresponding to species caught most frequently. Estimates might be imprecise for species that can be caught during both bottom and trolling fishing.
 
 ### CPUE
 
 ```{r}
 fish_species_cpue <- reactive({
   ft <- fish_trip() %>%
-    mutate(pd = 
-             plyr::mapvalues(Fishing_method, 
-                             c("Bottom fishing", "Trolling"), 
+    mutate(pd =
+             plyr::mapvalues(Fishing_method,
+                             c("Bottom fishing", "Trolling"),
                              c("Demersal", "Pelagic"))) %>%
     select(date, pd, effort)
-  
+
   pd <- fish_catch_categ() %>%
     group_by(English_names) %>%
     summarise(pd = first(Pelagic_or_demersal))
-  
+
   a <- fish_catch_categ() %>%
     filter(CalcWeight < 50000) %>%
     rename(date = TripDate) %>%
     group_by(date, English_names) %>%
     summarise(biomass = sum(CalcWeight/1000, na.rm = T))
-  
-  all_fish_date_combinations <- 
+
+  all_fish_date_combinations <-
     expand.grid(date = seq(min(a$date, na.rm = T), max(a$date, na.rm = T), by = "day"),
                 English_names = unique(a$English_names)) %>%
     left_join(a) %>%
     mutate(biomass = replace(biomass, is.na(biomass), 0)) %>%
     inner_join(pd)
-  
+
   cpue_species <- inner_join(all_fish_date_combinations, ft) %>%
     mutate(effort = replace(effort, is.na(effort), 0),
            cpue = biomass/effort) %>%
@@ -1272,7 +1274,7 @@ fish_cpue_trend <- reactive({
     plyr::ddply("English_names", function(x){
       m1 <- lm(cpue ~ date, data = x)
       m0 <- lm(cpue ~ 1, data = x)
-      
+
       data.frame(intercept = m1$coefficients[1],
                  slope = m1$coefficients[2],
                  p = anova(m1, m0)$`Pr(>F)`[2])
@@ -1280,44 +1282,44 @@ fish_cpue_trend <- reactive({
 })
 
 renderPlot({
-  
+
    a <- fish_cpue_trend()
-   
+
    if(input$significant_trend) {
      a %<>% filter(p <= input$significancy_level)
    }
    if(input$decreassing_trend) {
      a %<>% filter(slope < 0)
    }
-   
+
    validate(
    	need(nrow(a) > 0, "No species with the desired criteria and meaningful catch data for the selected time period were found")
    )
 
   p <- inner_join(fish_species_cpue(), a)%>%
-    mutate(sig = p < 0.05, 
+    mutate(sig = p < 0.05,
            slope = round(slope * 3600 * 24 * 365, 3),
-           sig = plyr::mapvalues(sig, c(T, F), 
+           sig = plyr::mapvalues(sig, c(T, F),
                                  c("Significant trend",
                                    "Non-signnificant trend")),
            text = paste0(sig, ": ", slope, " kg/hour/line/year")) %>%
     rename(species = English_names) %>%
-    ggplot(aes(date, cpue, 
-               colour = species, 
-               size = p > input$significancy_level, 
+    ggplot(aes(date, cpue,
+               colour = species,
+               size = p > input$significancy_level,
                text  = text)) +
     geom_smooth(se = F, method = "lm") +
     scale_color_manual(values = pallete()) +
     scale_size_manual(values = c(1, 0.3)) +
     theme_bw() +
-    xlab("") + ylab("CPUE") + 
+    xlab("") + ylab("CPUE") +
     theme(legend.position = "none")
   p
   # ggplotly(p, tooltip = c("colour", "text"))
 })
 ```
 
-> Species for wich less than ten individuals were caught during the study period are not included in the analysis. Reds and blues correspond to demersal and pelagic species respectively with darker shades corresponding to species caught most frequently. Estimates might be imprecise for species that can be caught during both bottom and trolling fishing.  
+> Species for wich less than ten individuals were caught during the study period are not included in the analysis. Reds and blues correspond to demersal and pelagic species respectively with darker shades corresponding to species caught most frequently. Estimates might be imprecise for species that can be caught during both bottom and trolling fishing.
 
 ## Review table {data-width=300}
 
@@ -1330,26 +1332,26 @@ renderDataTable({
 
   size <- fish_size_trend() %>%
     mutate(indicator = "size")
-  
+
   bind_rows(cpue, size) %>%
-    filter(p <= input$significancy_level, 
+    filter(p <= input$significancy_level,
            slope < 0) %>%
     mutate(indicator = paste("Decreassing", indicator)) %>%
     arrange(English_names) %>%
     select(English_names, indicator) %>%
-    rename(name = English_names, 
+    rename(name = English_names,
            reason = indicator) %>%
-    datatable(#style = "bootstrap", 
+    datatable(#style = "bootstrap",
               extensions = c("Scroller"),
               options = list(dom = 't',
                              # buttons = c('copy', 'csv', 'pdf', 'print'),
                              bPaginate = FALSE,
                              paging = FALSE,
                              scrollCollapse = FALSE,
-                             scroll_Y = 100, 
-                             # scroller = T, 
+                             scroll_Y = 100,
+                             # scroller = T,
                              deferRender = TRUE
-                             ), 
+                             ),
               rownames = FALSE,
               fillContainer = T)
 
