@@ -14,7 +14,7 @@ output:
 library(flexdashboard)
 library(shiny)
 library(magrittr)
-library(plotly)
+# library(plotly)
 library(ggplot2)
 library(DT)
 library(leaflet)
