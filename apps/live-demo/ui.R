@@ -20,8 +20,9 @@ shinyUI(fluidPage(
   fluidRow(
     column(8,
            h4("Real time data analysis"),
-           p("Supose we are interested on investigating the animal diversity of a particular location. An appropiate data infrastructure enables continuous exploration of the collected data. In this simple example it's easy to determine when enough sites have been sampled and an adequate biodiversity estimate has been obtained. All without repeated analysis or extra resources. Usually the more expensive the data collection, the more complex the data analysis, or the more urgent the research answer, the more savings can be made by setting up a data infrastructure with automated reports/analysis."),
-           p("Data for this example can be freely entered in this form. Observation data is based on a subset of observations by", a("Pyke et al. (2001)", "http://www.sciencemag.org/cgi/content/full/295/5555/666/DC1"), ".")
+           p("Suppose we are interested in investigating the animal diversity of a particular location. An appropriate data infrastructure enables continuous exploration of the collected data. In this simple example, it's easy to determine when enough sites have been sampled and an adequate biodiversity estimate has been obtained. All without repeated analysis or extra resources. Usually the more expensive the data collection, the more complex the data analysis, or the more urgent the research answer, the more savings can be made by setting up a data infrastructure with automated reports/analysis."),
+           p("The graph shows the mean species accumulation curves for a certain number of sampled sites vs random permutations of the data."),
+           p("Data for this example can be freely entered in ", strong(a("this", href = "https://ee.kobotoolbox.org/x/#YCb8")), "form. Observation data is based on a subset of observations by", a("Pyke et al. (2001)", href = "http://www.sciencemag.org/cgi/content/full/295/5555/666/DC1"), "in which species names have been modified for simplicity.")
     ),
     # column(4, offset = 1,
     #        "more description"
