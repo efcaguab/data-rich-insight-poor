@@ -45,7 +45,7 @@ community_tb <- function(x){
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
 
-  data_file <- reactivePoll(1000, session,
+  data <- reactivePoll(1000, session,
     checkFunc = function(){
       form_metadata <- httr::GET("https://kc.kobotoolbox.org/api/v1/forms/111907",
                                  httr::authenticate("efcaguab", "DQe1csPKT14!"))
@@ -57,15 +57,16 @@ shinyServer(function(input, output, session) {
                      httr::authenticate("efcaguab", "DQe1csPKT14!"))
       d <- httr::content(d)
       d <- jsonlite::toJSON(d)
-      saveRDS(jsonlite::fromJSON(d), "polldata.rds")
+      # saveRDS(jsonlite::fromJSON(d), "polldata.rds")
+      jsonlite::fromJSON(d)
     }
   )
   
-  data <- reactiveFileReader(1000, session, "polldata.rds", readRDS)
+  # data <- reactiveFileReader(1000, session, "polldata.rds", readRDS)
 
 
   output$spp_acc_curve <- renderTable({
-    data_file() # Download new data
+    # data_file() # Download new data
     community_df(data()) %>%
       group_by(sp) %>%
       summarise(frequency = n_distinct(site)) %>%
@@ -73,7 +74,7 @@ shinyServer(function(input, output, session) {
   })
    
   output$distPlot <- renderPlot({
-    data_file()
+    # data_file()
     # x <- community_tb(data())
     speac <- vegan::specaccum(community_tb(data()), "random")
     plot(speac, ci.type="poly", col="blue", lwd=2, ci.lty=0, ci.col="lightblue")
