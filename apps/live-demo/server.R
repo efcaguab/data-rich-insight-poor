@@ -18,24 +18,34 @@ ext_top_data <- function(d, field) {
   tolower(d)
 }
 
+null2na <- function(x){
+  if(is.null(x)) NA
+  else x
+}
+
 community_df <- function(x){
-  x <- x[, c("group_kl9eo56", "Site")]
+  x <- x[, c("group_kl9eo56", "Site", "_submission_time")]
   xx <- list(0, 0)
-  foreach (i =  1:nrow(x), .combine = rbind) %do% {
-    data.frame(sp = unlist(x[i, 1]), site = unlist(x[i, 2]))
+  xx <- foreach (i =  1:nrow(x), .combine = rbind) %do% {
+    data.frame(sp = null2na(unlist(x[i, 1])), 
+               site = null2na(unlist(x[i, 2])),
+               time = null2na(unlist(x[i, 3])))
   }
+  mutate(xx, time = as.POSIXct(time, "%Y-%m-%dT%H:%M:%S", tz = "GMT")) %>%
+    filter(time > as.POSIXct("2017-07-20"))
 }
 
 community_tb <- function(x){
   xx <- community_df(x)
   xx <- reshape2::acast(xx, site ~ sp)
-  is.na(xx)
+  # is.na(xx)
+  xx
 }
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
 
-  data <- reactivePoll(1000, session,
+  data_file <- reactivePoll(1000, session,
     checkFunc = function(){
       form_metadata <- httr::GET("https://kc.kobotoolbox.org/api/v1/forms/111907",
                                  httr::authenticate("efcaguab", "DQe1csPKT14!"))
@@ -47,12 +57,15 @@ shinyServer(function(input, output, session) {
                      httr::authenticate("efcaguab", "DQe1csPKT14!"))
       d <- httr::content(d)
       d <- jsonlite::toJSON(d)
-      jsonlite::fromJSON(d)
+      saveRDS(jsonlite::fromJSON(d), "polldata.rds")
     }
   )
+  
+  data <- reactiveFileReader(1000, session, "polldata.rds", readRDS)
 
 
   output$spp_acc_curve <- renderTable({
+    data_file() # Download new data
     community_df(data()) %>%
       group_by(sp) %>%
       summarise(frequency = n_distinct(site)) %>%
@@ -60,11 +73,12 @@ shinyServer(function(input, output, session) {
   })
    
   output$distPlot <- renderPlot({
-    
+    data_file()
+    # x <- community_tb(data())
     speac <- vegan::specaccum(community_tb(data()), "random")
     plot(speac, ci.type="poly", col="blue", lwd=2, ci.lty=0, ci.col="lightblue")
-    # boxplot(speac, col="yellow", add=TRUE, pch="+")
-    
+    boxplot(speac, col="yellow", add=TRUE, pch="+")
+    # x
   })
   
 })
