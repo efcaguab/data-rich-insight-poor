@@ -13,6 +13,12 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
+<style>
+html {
+  overflow-y: scroll;
+}
+</style>
+
   </head>
   <body>
     <header>
@@ -51,10 +57,7 @@
       <hr>
 
 		<div class="row">
-			<div class="span4 collapse-group">
-			<div class="collapse" id = "tutorial">
-				<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-				<hr>
+			<div class="col-md-12 collapse" id = "tutorial">
 				<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
 				<hr>
 				<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
@@ -84,7 +87,7 @@
 				<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
 				<hr>
 			</div>
-			</div>
+
 		</div>
 
       <footer>
@@ -92,19 +95,6 @@
       <p>Online hosting sponsored by the <a href="http://www.sif.sc/">Seychelles Islands Foundation</a>. Additional thanks for logistical and financial support to the University of Wyoming, and <a href="www.stoufferlab.org">Daniel Stouffer</a> at the University of Canterbury.</p>
       </footer>
     </div>
-
-	<script type='text/javascript'>//<![CDATA[
-		$(window).on('load', function(){
-		$('.row .btn').on('click', function(e) {
-		e.preventDefault();
-		var $this = $(this);
-		var $collapse = $this.closest('.collapse-group').find('.collapse');
-		$collapse.collapse('toggle');
-		});
-
-		});//]]> 
-
-	</script>
 
 
   </body>
