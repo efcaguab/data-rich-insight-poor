@@ -2,3 +2,22 @@
 live-demo/\.Rproj\.user/
 
 live-demo/~\$presentation-workshop\.pptx
+.Rproj.user
+
+live-demo/\.RData
+
+live-demo/\.Rhistory
+
+live-demo/\.Rprofile
+
+*.pdf
+
+apps/live-demo/\.Rhistory
+
+apps/monitoring-demo/data/raw/tables/\.DS_Store
+
+apps/monitoring-demo/\.Rhistory
+
+\.DS_Store
+
+apps/live-demo/\.RData
