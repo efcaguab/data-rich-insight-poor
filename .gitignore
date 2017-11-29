@@ -2,17 +2,22 @@
 live-demo/\.Rproj\.user/
 
 live-demo/~\$presentation-workshop\.pptx
+.Rproj.user
 
-apps/live-demo/packrat/
+live-demo/\.RData
 
-apps/live-demo/\.Rproj\.user/
+live-demo/\.Rhistory
 
-\.DS_Store
+live-demo/\.Rprofile
 
-apps/monitoring-demo/\.Rproj\.user/
+*.pdf
+
+apps/live-demo/\.Rhistory
+
+apps/monitoring-demo/data/raw/tables/\.DS_Store
 
 apps/monitoring-demo/\.Rhistory
 
-apps/live-demo/\.Rhistory
+\.DS_Store
 
 apps/live-demo/\.RData

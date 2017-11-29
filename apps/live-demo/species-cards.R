@@ -2,6 +2,7 @@
 library(vegan)
 library(MASS)
 library(ggplot2)
+library(dplyr)
 
 data("BCI")
 data("Animals")
@@ -31,16 +32,16 @@ BCI <- tidyr::gather(BCI, "animal", "present", -site) %>%
   dplyr::mutate(order = runif(1)) %>%
   dplyr::arrange(site)
 
-for(i in 1:8){
-  ggplot(BCI[(32*(i-1)+1):(32*i), ]) +
+for(i in 1:4){
+  ggplot(BCI[(64*(i-1)+1):(64*i), ]) +
     geom_text(aes(label = animal), x = 0.5, y = 0.65, size = 5) +
     geom_text(aes(label = paste("site:", site)), x = 0.5, y = 0.35, size = 4) +
-    facet_wrap(~order, ncol = 4, nrow = 8) +
+    facet_wrap(~order, ncol = 8, nrow = 8) +
     theme_minimal()  + 
     theme(strip.background = element_blank(),
           strip.text.x = element_blank())
   
-  ggsave(paste0("names_", i, ".pdf"), device = "pdf", width = 8.5, height = 11, units = "in")
+  ggsave(paste0("names_", i, ".pdf"), device = "pdf", width = 16.53, height = 11.69, units = "in")
 }
 
 
