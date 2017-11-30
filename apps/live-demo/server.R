@@ -79,9 +79,13 @@ shinyServer(function(input, output, session) {
   output$distPlot <- renderPlot({
     # data_file()
     # x <- community_tb(data())
-    speac <- vegan::specaccum(community_tb(data()), "random")
-    plot(speac, ci.type="poly", col="blue", lwd=2, ci.lty=0, ci.col="lightblue")
-    boxplot(speac, col="yellow", add=TRUE, pch="+")
+    speac <- try(vegan::specaccum(community_tb(data()), "random"), silent = T)
+    if(class(speac)=="try-error"){
+      plot.new()
+    }else{
+      plot(speac, ci.type="poly", col="blue", lwd=2, ci.lty=0, ci.col="lightblue")
+      boxplot(speac, col="yellow", add=TRUE, pch="+")       
+    }
     # x
   })
   
