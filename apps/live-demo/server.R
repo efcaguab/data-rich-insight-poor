@@ -31,13 +31,16 @@ community_df <- function(x){
                site = null2na(unlist(x[i, 2])),
                time = null2na(unlist(x[i, 3])))
   }
-  mutate(xx, time = as.POSIXct(time, "%Y-%m-%dT%H:%M:%S", tz = "GMT")) %>%
+  mutate(xx, time = as.POSIXct(time, "%Y-%m-%dT%H:%M:%S", tz = "GMT"),
+         sp = as.character(sp),
+         site = as.character(site),
+         present = 1) %>%
     filter(time > as.POSIXct("2017-07-20"))
 }
 
 community_tb <- function(x){
   xx <- community_df(x)
-  xx <- reshape2::acast(xx, site ~ sp)
+  xx <- reshape2::acast(xx, site ~ sp, fill = 0, value.var = "present")
   # is.na(xx)
   xx
 }
